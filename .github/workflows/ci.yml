@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 🔐 .env 파일 생성
+        run: |
+          echo "${{ secrets.ENV }}" | base64 -d > .env
+
       - name: 📦 소스코드 체크아웃
         uses: actions/checkout@v3
 
