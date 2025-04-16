@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 📦 소스코드 체크아웃
+        uses: actions/checkout@v3
+
       - name: 🔐 .env 파일 생성
         run: |
           echo "${{ secrets.ENV }}" | base64 -d > .env
-
-      - name: 📦 소스코드 체크아웃
-        uses: actions/checkout@v3
 
       - name: 🐍 Python 3.10 환경 설정
         uses: actions/setup-python@v4
@@ -28,6 +28,8 @@ jobs:
 
       - name: ✅ 기능 테스트 실행
         env:
+          SPOTIPY_CLIENT_ID: ${{ secrets.SPOTIPY_CLIENT_ID }}
+          SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
           TOKENIZERS_PARALLELISM: false
         run: |
           echo "🧪 기능 테스트를 실행합니다..."
