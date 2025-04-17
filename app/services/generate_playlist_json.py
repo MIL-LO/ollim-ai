@@ -5,7 +5,7 @@ keywords = ["슬픔", "기쁨", "이별", "편안함", "사랑"]
 flattened_data = []
 
 for kw in keywords:
-    print(f"📚 키워드 '{kw}' 검색 중...")
+    print(f"키워드 '{kw}' 검색 중...")
     playlists = fetch_playlists_by_keyword(kw, limit=10)
     for pl in playlists:
         if pl:
@@ -34,10 +34,10 @@ for kw in keywords:
                 })
 
             except Exception as e:
-                print(f"⚠️ {pl.get('name')} 실패: {e}")
+                print(f"{pl.get('name')} 실패: {e}")
 
 # 저장
 with open("data/cleaned_playlists.json", "w", encoding="utf-8") as f:
     json.dump(flattened_data, f, ensure_ascii=False, indent=2)
 
-print(f"\n✅ 총 {len(flattened_data)}개의 플레이리스트가 저장되었습니다.")
+print(f"\n총 {len(flattened_data)}개의 플레이리스트가 저장되었습니다.")
