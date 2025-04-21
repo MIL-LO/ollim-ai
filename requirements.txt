@@ -1,5 +1,27 @@
-python-dotenv
-spotipy
-sentence-transformers
-transformers
-pymilvus
+# 환경 변수 로딩
+python-dotenv                # .env 파일을 통해 환경변수 관리
+
+# Spotify API 연동
+spotipy                     # Spotify Web API 연동용 라이브러리
+
+# 문장 임베딩 모델
+sentence-transformers       # 텍스트를 벡터로 변환 (e.g. multilingual-e5-base)
+transformers                # huggingface 기반 모델 사용 가능 (서브 의존성)
+
+# 벡터 DB
+pymilvus                    # Milvus 벡터 DB와 연동하기 위한 Python client
+
+# API 서버
+fastapi                     # 비동기 Python 웹 프레임워크
+uvicorn[standard]           # FastAPI용 ASGI 서버 (Hot Reload 지원 포함)
+
+# 테스트용
+httpx                       # FastAPI 테스트용 비동기 클라이언트
+pytest                     # 테스트 자동화 도구
+pytest-asyncio             # 비동기 함수 테스트 지원
+
+# 타입 안정성 보조
+pydantic                   # 데이터 검증 및 직렬화 도구 (FastAPI 내부 의존 포함)
+
+# 유틸리티
+tqdm                        # 진행률 표시 (대량 playlist 처리 시 유용)
