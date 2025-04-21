@@ -8,6 +8,9 @@ spotipy                     # Spotify Web API 연동용 라이브러리
 sentence-transformers       # 텍스트를 벡터로 변환 (e.g. multilingual-e5-base)
 transformers                # huggingface 기반 모델 사용 가능 (서브 의존성)
 
+# 번역
+deep_translator            # 다국어 번역 라이브러리 (Google, Papago 등 지원)
+
 # 벡터 DB
 pymilvus                    # Milvus 벡터 DB와 연동하기 위한 Python client
 
