@@ -1,8 +1,8 @@
 from pymilvus import connections, Collection
 
 def search_playlist(embedding: list[float], top_k=5):
-    # Milvus 연결 (이미 연결되어 있다면 생략 가능)
-    connections.connect(alias="default", host="localhost", port="19530")
+    # Milvus 연결 
+    connections.connect(alias="default", host="milvus", port="19530")
     
     # 컬렉션 로드
     collection = Collection("spotify_playlists", using="default")
