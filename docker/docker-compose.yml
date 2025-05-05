@@ -1,77 +1,100 @@
+version: "3.8"
+
 services:
+  # etcd: Milvus 메타데이터 저장용 Key-Value 저장소
   etcd:
     image: quay.io/coreos/etcd:v3.5.5
     container_name: etcd
     environment:
-      # 설정된 개정 수 기준으로 자동 압축 수행
       - ETCD_AUTO_COMPACTION_MODE=revision
       - ETCD_AUTO_COMPACTION_RETENTION=1000
-      # etcd 백엔드 데이터 크기 제한 설정 (4GB)
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
-      # 스냅샷 빈도 설정
       - ETCD_SNAPSHOT_COUNT=50000
-      # 클라이언트 요청 수신을 모든 네트워크 인터페이스에서 허용
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
-      # 클러스터에서의 클라이언트 URL 광고 주소
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
     volumes:
-      - etcd_data:/etcd  # etcd 데이터 영속 저장
+      - etcd_data:/etcd
     networks:
-      - milvus_net       # milvus 전용 네트워크에 연결
+      - milvus_net
 
+  # MinIO: Milvus 벡터 데이터를 저장할 오브젝트 스토리지
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      # MinIO 기본 계정 설정
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
     ports:
-      - "9000:9000"  # MinIO API
-      - "9001:9001"  # MinIO 콘솔 UI
+      - "9000:9000"
+      - "9001:9001"
     volumes:
-      - minio_data:/data  # MinIO 저장소 데이터 마운트
+      - minio_data:/data
     networks:
       - milvus_net
 
+  # Milvus: 벡터 데이터베이스 서버 (standalone 모드)
   milvus:
     image: milvusdb/milvus:v2.3.9
     container_name: milvus
     command: ["milvus", "run", "standalone"]
     ports:
-      - "19530:19530"  # Milvus gRPC 포트
-      - "9091:9091"    # Milvus REST API 포트
+      - "19530:19530"
+      - "9091:9091"
     volumes:
-      - milvus_data:/var/lib/milvus  # Milvus 저장 데이터
+      - milvus_data:/var/lib/milvus
     environment:
-      # Milvus에 연결할 etcd 및 MinIO 설정
       - ETCD_ENDPOINTS=etcd:2379
       - MINIO_ADDRESS=minio:9000
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
       - MILVUS_LOG_LEVEL=info
     depends_on:
-      - etcd    # etcd가 먼저 실행되어야 함
-      - minio   # minio가 먼저 실행되어야 함
+      - etcd
+      - minio
     networks:
       - milvus_net
 
+  # Attu: Milvus 관리용 웹 UI
   attu:
     image: zilliz/attu:latest
     container_name: attu
     ports:
-      - "8000:3000"  # Attu UI에 접근할 로컬 포트 설정
+      - "8000:3000"
     environment:
-      MILVUS_URL: http://milvus:19530  # Milvus와 통신할 주소
+      MILVUS_URL: http://milvus:19530
     depends_on:
-      - milvus  # Milvus가 먼저 실행되어야 함
+      - milvus
     networks:
       - milvus_net
 
-volumes:
-  etcd_data:    # etcd 영속 저장소
-  minio_data:   # minio 영속 저장소
-  milvus_data:  # milvus 영속 저장소
+  # ollim-ai: FastAPI 기반 백엔드 서버
+  ollim-ai:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: ollim-ai
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - SPOTIPY_CLIENT_ID=${SPOTIPY_CLIENT_ID}
+      - SPOTIPY_CLIENT_SECRET=${SPOTIPY_CLIENT_SECRET}
+      - SPOTIPY_REDIRECT_URI=${SPOTIPY_REDIRECT_URI}
+    depends_on:
+      - milvus
+    networks:
+      - milvus_net
 
+# 데이터 저장을 위한 Docker 볼륨 설정
+volumes:
+  etcd_data:
+  minio_data:
+  milvus_data:
+
+# 서비스 간 통신을 위한 Docker 네트워크 설정
 networks:
-  milvus_net:   # 모든 서비스가 공유하는 내부 네트워크
+  milvus_net:
