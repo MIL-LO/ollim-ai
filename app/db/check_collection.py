@@ -1,7 +1,7 @@
 from pymilvus import connections, Collection
 
 # Milvus 서버 연결
-connections.connect("default", host="localhost", port="19530")
+connections.connect("default", host="milvus", port="19530")
 
 # 확인할 컬렉션 이름
 collection_name = "spotify_playlists"
