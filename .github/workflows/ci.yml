@@ -50,7 +50,7 @@ jobs:
       - name: 📂 데이터베이스에 데이터 삽입
         run: |
           echo "Milvus에 데이터를 삽입합니다..."
-          PYTHONPATH=. python app/db/insert_playlist.py
+          PYTHONPATH=. python app/db/insert_playlist.py --milvus-only
           echo "데이터 삽입 완료"
 
       - name: ✅ 기능 테스트 실행
