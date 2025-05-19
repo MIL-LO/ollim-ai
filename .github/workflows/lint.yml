@@ -34,6 +34,8 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch
+          git pull origin HEAD:${{ github.head_ref }}
           git add .
           git commit -m "style: Ruff 자동 적용" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref }}
