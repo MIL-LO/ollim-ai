@@ -1,5 +1,7 @@
-from app.api.spotify_client import sp
 from spotipy.exceptions import SpotifyException
+
+from app.api.spotify_client import sp
+
 
 # 키워드 기반 (장르를 자연어로 검색)
 def fetch_playlists_by_genre(genre_keyword: str, limit=50, offset=0):

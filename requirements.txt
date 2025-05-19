@@ -31,3 +31,6 @@ tqdm                        # 진행률 표시 (대량 playlist 처리 시 유�
 
 # HuggingFace 최적화 다운로드
 hf_xet
+
+# Python 코드 린터 및 자동 정리 도구
+ruff

@@ -1,8 +1,10 @@
 import json
-from pymilvus import connections, Collection
+
+from deep_translator import GoogleTranslator
+from pymilvus import Collection
+from pymilvus import connections
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
-from deep_translator import GoogleTranslator
 
 # 전역 모델 변수 (지연 로딩)
 embedding_model = None
@@ -104,7 +106,7 @@ def insert_to_milvus(insert_data: list):
 # CI 전용 main
 if __name__ == "__main__":
     try:
-        with open("data/cleaned_playlists.json", "r", encoding="utf-8") as f:
+        with open("data/cleaned_playlists.json", encoding="utf-8") as f:
             playlist_data = json.load(f)
         insert_data = prepare_insert_data(playlist_data)
         insert_to_milvus(insert_data)

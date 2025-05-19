@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
+
 from app.services import spotify_playlist_fetcher
+
 
 class TestGeneratePlaylistJson(unittest.TestCase):
 

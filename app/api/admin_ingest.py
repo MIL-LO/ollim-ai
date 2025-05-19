@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Query
-from typing import List
 import json
 import os
 
+from fastapi import APIRouter
+from fastapi import Query
+
+from app.db.insert_playlist import insert_to_milvus
+from app.db.insert_playlist import prepare_insert_data
+from app.db.milvus_schema import define_playlist_collection
+from app.services.spotify_playlist_fetcher import fetch_playlist_details
 from app.services.spotify_playlist_fetcher import (
     fetch_playlists_by_genre as fetch_playlists_by_keyword,
-    fetch_playlist_details,
 )
-from app.db.insert_playlist import prepare_insert_data, insert_to_milvus
-from app.db.milvus_schema import define_playlist_collection
 
 router = APIRouter()
 
 
 @router.get("/admin/fetch-and-insert")
-def fetch_and_insert_playlists(keywords: List[str] = Query(..., description="수집할 키워드 목록")):
+def fetch_and_insert_playlists(keywords: list[str] = Query(..., description="수집할 키워드 목록")):
     """
     🔧 Spotify에서 플레이리스트를 수집하고 Milvus에 삽입하는 관리자용 API (GET 요청)
     """

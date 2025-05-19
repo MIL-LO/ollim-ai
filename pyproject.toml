@@ -1,0 +1,21 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+exclude = ["venv", "docker", "__pycache__"]
+fix = true
+
+# 선택적으로 사용하고 싶은 규칙 그룹을 정의
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "I",  # isort (import 정렬)
+    "UP", # pyupgrade
+]
+
+# 무시하고 싶은 규칙 (예: E501은 max line length)
+ignore = ["E501"]
+
+# import 자동 정렬 설정 (I 규칙용)
+[tool.ruff.isort]
+known-first-party = ["app"]
+force-single-line = true

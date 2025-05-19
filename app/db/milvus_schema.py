@@ -1,4 +1,10 @@
-from pymilvus import FieldSchema, CollectionSchema, DataType, Collection, connections, utility
+from pymilvus import Collection
+from pymilvus import CollectionSchema
+from pymilvus import DataType
+from pymilvus import FieldSchema
+from pymilvus import connections
+from pymilvus import utility
+
 
 def define_playlist_collection():
     connections.connect("default", host="milvus", port="19530")

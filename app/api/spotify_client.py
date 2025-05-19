@@ -1,6 +1,7 @@
 import os
-from dotenv import load_dotenv
+
 import spotipy
+from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 
 # .env 파일 로드

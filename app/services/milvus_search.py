@@ -1,4 +1,6 @@
-from pymilvus import connections, Collection
+from pymilvus import Collection
+from pymilvus import connections
+
 
 def search_playlist(embedding: list[float], top_k=5):
     # Milvus 연결 

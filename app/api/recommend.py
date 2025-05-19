@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+
 from app.services.embedding import get_diary_embedding
 from app.services.milvus_search import search_playlist
 
