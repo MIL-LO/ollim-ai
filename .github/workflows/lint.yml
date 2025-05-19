@@ -7,15 +7,17 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write
+  contents: write  # GitHub Actions가 자동 커밋/푸시 권한 갖도록 설정
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}  # PR일 경우 정확한 브랜치 체크아웃
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -34,8 +36,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git fetch
-          git pull origin HEAD:${{ github.head_ref }}
+          git pull --rebase origin ${{ github.head_ref }}
           git add .
           git commit -m "style: Ruff 자동 적용" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref }}
