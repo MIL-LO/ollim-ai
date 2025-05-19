@@ -2,13 +2,17 @@ name: Ruff Linter
 
 on:
   pull_request:
-    branches: [ main, dev ]
+    branches: [ dev ]
+  push:
+    branches: [ main ]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -20,5 +24,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff
 
-      - name: Run Ruff
+      - name: Run Ruff 자동 수정
         run: ruff check . --fix
+
+      - name: Commit and Push fixes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "style: Ruff 자동 적용" || echo "No changes to commit"
+          git push
