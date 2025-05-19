@@ -1,4 +1,5 @@
-from pymilvus import connections, Collection
+from pymilvus import Collection
+from pymilvus import connections
 
 # Milvus 서버 연결
 connections.connect("default", host="milvus", port="19530")
@@ -12,7 +13,7 @@ collection = Collection(collection_name)
 # 컬렉션 정보 출력
 print(f"\n컬렉션 이름: {collection.name}")
 print(f"설명: {collection.description}")
-print(f"필드 스키마:")
+print("필드 스키마:")
 for field in collection.schema.fields:
     print(f" - {field.name} ({field.dtype})")
 

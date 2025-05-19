@@ -1,5 +1,9 @@
 import json
-from app.services.spotify_playlist_fetcher import fetch_playlists_by_genre as fetch_playlists_by_keyword, fetch_playlist_details
+
+from app.services.spotify_playlist_fetcher import fetch_playlist_details
+from app.services.spotify_playlist_fetcher import (
+    fetch_playlists_by_genre as fetch_playlists_by_keyword,
+)
 
 keywords = ["슬픔", "기쁨", "이별", "편안함", "사랑"]
 flattened_data = []
