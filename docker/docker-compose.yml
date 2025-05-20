@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  # etcd: Milvus 메타데이터 저장용 Key-Value 저장소
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: etcd
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    volumes:
+      - etcd_data:/etcd
+    networks:
+      - milvus_net
+
+  # MinIO: Milvus 벡터 데이터를 저장할 오브젝트 스토리지
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - milvus_net
+
+  # Milvus: 벡터 데이터베이스 서버 (standalone 모드)
+  milvus:
+    image: milvusdb/milvus:v2.3.9
+    container_name: milvus
+    command: ["milvus", "run", "standalone"]
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvus_data:/var/lib/milvus
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MILVUS_LOG_LEVEL=info
+    depends_on:
+      - etcd
+      - minio
+    networks:
+      - milvus_net
+
+  # Attu: Milvus 관리용 웹 UI
+  attu:
+    image: zilliz/attu:latest
+    container_name: attu
+    ports:
+      - "8000:3000"
+    environment:
+      MILVUS_URL: http://milvus:19530
+    depends_on:
+      - milvus
+    networks:
+      - milvus_net
+
+  # ollim-ai: FastAPI 기반 백엔드 서버
+  ollim-ai:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: ollim-ai
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - SPOTIPY_CLIENT_ID=${SPOTIPY_CLIENT_ID}
+      - SPOTIPY_CLIENT_SECRET=${SPOTIPY_CLIENT_SECRET}
+      - SPOTIPY_REDIRECT_URI=${SPOTIPY_REDIRECT_URI}
+    depends_on:
+      - milvus
+    networks:
+      - milvus_net
+
+# 데이터 저장을 위한 Docker 볼륨 설정
+volumes:
+  etcd_data:
+  minio_data:
+  milvus_data:
+
+# 서비스 간 통신을 위한 Docker 네트워크 설정
+networks:
+  milvus_net:

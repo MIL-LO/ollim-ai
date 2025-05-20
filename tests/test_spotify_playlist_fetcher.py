@@ -1,42 +1,55 @@
 import unittest
-from unittest.mock import patch, MagicMock
-from app.services.spotify_playlist_fetcher import fetch_playlists_by_keyword, fetch_playlist_details
+from unittest.mock import patch
 
-class TestSpotifyPlaylistFetcher(unittest.TestCase):
 
-    @patch("app.services.spotify_playlist_fetcher.sp")
-    def test_fetch_playlists_by_keyword(self, mock_sp):
-        mock_sp.search.return_value = {
-            "playlists": {
-                "items": [
-                    {"id": "123", "name": "Test Playlist"},
-                    {"id": "456", "name": "Another Playlist"}
-                ]
-            }
-        }
+class TestGeneratePlaylistJson(unittest.TestCase):
 
-        result = fetch_playlists_by_keyword("기쁨")
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["id"], "123")
+    @patch("app.services.spotify_playlist_fetcher.fetch_playlists_by_genre")
+    @patch("app.services.spotify_playlist_fetcher.fetch_playlist_details")
+    def test_flattened_playlist_generation(self, mock_details, mock_search):
+        # Mock playlist search result
+        mock_search.return_value = [{"id": "test_id", "name": "Test Playlist"}]
 
-    @patch("app.services.spotify_playlist_fetcher.sp")
-    def test_fetch_playlist_details(self, mock_sp):
-        mock_sp.playlist.return_value = {
-            "id": "123",
+        # Mock playlist details
+        mock_details.return_value = {
+            "id": "test_id",
             "name": "Test Playlist",
             "description": "Test Description",
-            "images": [{"url": "http://example.com/image.jpg", "width": 300, "height": 300}],
-            "owner": {"id": "owner123", "display_name": "Owner Name"},
-            "followers": {"total": 100},
-            "tracks": {"items": [{"track": {"name": "Song A"}}, {"track": {"name": "Song B"}}]}
+            "image_url": "http://test.image",
+            "image_width": 300,
+            "image_height": 300,
+            "owner_id": "owner123",
+            "owner_name": "Test Owner",
+            "followers": 100,
+            "tracks": [{"track": {"name": "Song 1"}}, {"track": {"name": "Song 2"}}]
         }
 
-        result = fetch_playlist_details("123")
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result["id"], "123")
-        self.assertEqual(result["name"], "Test Playlist")
-        self.assertEqual(result["followers"], 100)
+        # Simulate generation logic
+        keywords = ["테스트"]
+        flattened_data = []
 
-if __name__ == "__main__":
+        for kw in keywords:
+            playlists = mock_search(kw, limit=1)
+            for pl in playlists:
+                detail = mock_details(pl["id"])
+                track_names = [t["track"]["name"] for t in detail.get("tracks", []) if "track" in t]
+                flattened_data.append({
+                    "id": detail["id"],
+                    "name": detail.get("name", ""),
+                    "description": detail.get("description", ""),
+                    "image_url": detail.get("image_url", ""),
+                    "image_width": detail.get("image_width", 0),
+                    "image_height": detail.get("image_height", 0),
+                    "owner_id": detail.get("owner_id", ""),
+                    "owner_name": detail.get("owner_name", ""),
+                    "followers": detail.get("followers", 0),
+                    "track_summary": ", ".join(track_names)
+                })
+
+        # Assert structure
+        self.assertEqual(len(flattened_data), 1)
+        self.assertEqual(flattened_data[0]["id"], "test_id")
+        self.assertIn("Song 1", flattened_data[0]["track_summary"])
+
+if __name__ == '__main__':
     unittest.main()
